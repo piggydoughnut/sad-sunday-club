@@ -21,16 +21,16 @@
     }
   </style>
 </head>
-<body class="bg-white text-[#6b4e4d] m-0 p-0 font-light mx-20">
-  <div class="relative min-h-screen flex items-center px-4">
-    <nav class="absolute top-6 right-8 z-50">
+<body class="bg-white text-[#6b4e4d] m-0 p-0 font-light mx-4 md:mx-12 lg:mx-20 flex flex-col min-h-screen">
+  <div class="relative flex-1 px-4 overflow-hidden">
+    <nav class="absolute top-4 right-4 md:top-6 md:right-8 z-50">
       <a href="about.html" class="text-[#8b6f6e] hover:text-[#6b4e4d] transition-colors font-light">About</a>
     </nav>
-    <div class="w-full flex flex-col items-center text-center">
-      <h1 class="header-font text-[2rem] mb-2 font-normal">Sad Sunday Club</h1>
-      <p class="text-lg text-[#8b6f6e] font-light">A quiet place for people who feel things deeply.</p>
+    <div class="absolute top-[25%] left-1/2 transform -translate-x-1/2 w-full flex flex-col items-center text-center">
+      <h1 class="header-font text-xl md:text-2xl mb-2 font-normal">Sad Sunday Club</h1>
+      <p class="text-base md:text-lg text-[#8b6f6e] font-light px-4">A quiet place for people who feel things deeply.</p>
     </div>
-    <div class="absolute top-[60%] left-1/2 transform -translate-x-1/2 w-full max-w-[700px] px-4">
+    <div class="absolute top-[38%] left-1/2 transform -translate-x-1/2 w-full max-w-[700px] px-4 md:px-8">
       <ul class="space-y-4">
         <li>
           <a href="entries/entry-2025-11-01.html" class="text-[#6b4e4d] hover:text-[#8b6f6e] transition-colors">
@@ -63,66 +63,57 @@
           </a>
         </li> -->
       </ul>
+      
+      <div class="mt-16 text-center bg-[#faf0eb] rounded-xl p-6 md:p-8">
+        <h2 class="font-mono text-l mb-4 font-normal">Join the Club</h2>
+        <p class="mb-6 text-sm">The Club isn't loud. We don't post every day. But sometimes we send small letters — drawings and thoughts, or gentle reminders that you are not alone in this.</p>
+        <form id="email-form" class="flex flex-col gap-3 sm:flex-row sm:gap-2 justify-center items-center w-full">
+          <input type="email" name="email" id="email-input" placeholder="your@email.com" required class="w-full sm:w-auto px-4 py-2.5 border border-[#f5d4c9] rounded-md text-base bg-white">
+          <button type="submit" class="px-5 py-2.5 border-none bg-[#d4a8a0] text-white rounded-md cursor-pointer text-base hover:bg-[#c99b8f] transition-colors">Send me quiet things</button>
+        </form>
+        <p id="form-message" class="mt-4 text-sm text-[#8b6f6e]" style="display: none;"></p>
+      </div>
     </div>
   </div>
-  <main class="max-w-[700px] mx-auto px-4 py-8 leading-relaxed">
-
-    <section class="text-center bg-[#faf0eb] rounded-xl p-8 mb-12">
-      <h2 class="font-mono text-l mb-4 font-normal">Join the Club</h2>
-      <p class="mb-6 text-sm">The Club isn't loud. We don't post every day. But sometimes we send small letters — drawings, thoughts, or gentle reminders that you're doing okay.</p>
-      <form id="email-form" class="flex flex-col sm:flex-row gap-2 justify-center items-center">
-        <input type="email" name="email" id="email-input" placeholder="your@email.com" required class="px-4 py-2.5 border border-[#f5d4c9] rounded-md text-base bg-white">
-        <button type="submit" class="px-5 py-2.5 border-none bg-[#d4a8a0] text-white rounded-md cursor-pointer text-base hover:bg-[#c99b8f] transition-colors">Send me quiet things</button>
-      </form>
-      <p id="form-message" class="mt-4 text-sm text-[#8b6f6e]" style="display: none;"></p>
-    </section>
-    <script>
-      document.getElementById('email-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const email = document.getElementById('email-input').value;
-        const button = this.querySelector('button');
-        const messageEl = document.getElementById('form-message');
+  <script>
+    document.getElementById('email-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email-input').value;
+      const button = this.querySelector('button');
+      const messageEl = document.getElementById('form-message');
+      
+      button.disabled = true;
+      button.textContent = 'Sending...';
+      messageEl.style.display = 'none';
+      
+      try {
+        const response = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
         
-        button.disabled = true;
-        button.textContent = 'Sending...';
-        messageEl.style.display = 'none';
+        const data = await response.json();
         
-        try {
-          const response = await fetch('/api/subscribe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-          });
-          
-          const data = await response.json();
-          
-          if (response.ok) {
-            messageEl.textContent = 'Thank you! You\'ll receive quiet things soon.';
-            messageEl.style.color = '#6b4e4d';
-            messageEl.style.display = 'block';
-            this.reset();
-          } else {
-            throw new Error(data.error || 'Something went wrong');
-          }
-        } catch (error) {
-          messageEl.textContent = 'Sorry, something went wrong. Please try again.';
-          messageEl.style.color = '#c4a8a5';
+        if (response.ok) {
+          messageEl.textContent = 'Thank you! You\'ll receive quiet things soon.';
+          messageEl.style.color = '#6b4e4d';
           messageEl.style.display = 'block';
-        } finally {
-          button.disabled = false;
-          button.textContent = 'Send me quiet things';
+          this.reset();
+        } else {
+          throw new Error(data.error || 'Something went wrong');
         }
-      });
-    </script>
-    </section>
-
-    <!-- <section class="mb-12">
-      <h2 class="font-mono text-2xl mb-4 font-normal">Shop</h2>
-      <p class="mb-4">If you'd like to carry a piece of this feeling with you — we have small prints, zines, and other things made with care.</p>
-      <a href="#" class="inline-block mt-4 bg-[#d4a8a0] text-white px-6 py-3 rounded-md no-underline hover:bg-[#c99b8f] transition-colors">Visit the Shop</a>
-    </section> -->
-  </main>
-  <footer class="text-center text-sm text-[#8b6f6e] py-8 px-4 border-t border-[#f5d4c9]">
+      } catch (error) {
+        messageEl.textContent = 'Sorry, something went wrong. Please try again.';
+        messageEl.style.color = '#c4a8a5';
+        messageEl.style.display = 'block';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Send me quiet things';
+      }
+    });
+  </script>
+  <footer class="text-center text-sm text-[#8b6f6e] py-6 px-4 border-t border-[#f5d4c9] mt-auto">
     <p>Sad Sunday Club — made by a human, for humans.</p>
   </footer>
 </body>
