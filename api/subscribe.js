@@ -26,13 +26,12 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Server configuration error" });
     }
 
-    // Initialize Mailgun client
+    // Initialize Mailgun client with EU endpoint
     const mailgun = new Mailgun(FormData);
     const mg = mailgun.client({
       username: "api",
       key: apiKey,
-      // Use EU endpoint if your domain is EU-based, otherwise use default US endpoint
-      // url: "https://api.eu.mailgun.net" // Uncomment if using EU domain
+      url: "https://api.eu.mailgun.net", // EU endpoint
     });
 
     // Send notification email to admin
