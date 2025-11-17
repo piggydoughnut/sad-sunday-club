@@ -1,0 +1,10 @@
+{
+  "name": "sad-sunday-club",
+  "version": "1.0.0",
+  "description": "Sad Sunday Club website",
+  "type": "module",
+  "dependencies": {
+    "form-data": "^4.0.1",
+    "mailgun.js": "^11.1.0"
+  }
+}
