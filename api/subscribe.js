@@ -6,6 +6,33 @@ import FormData from "form-data";
 import Mailgun from "mailgun.js";
 import { getWelcomeEmailHTML } from "../emails/welcome-email.js";
 
+function formatDateWithDay() {
+  const now = new Date();
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const dayName = days[now.getUTCDay()];
+  const date = now.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+  const time = now.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "UTC",
+  });
+  return `${dayName}, ${date} at ${time} UTC`;
+}
+
 // Send Telegram notification (non-blocking)
 async function sendTelegramNotification(email) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -16,7 +43,8 @@ async function sendTelegramNotification(email) {
   }
 
   try {
-    const message = `🎉 New subscription!\n\nEmail: ${email}`;
+    const formattedDateTime = formatDateWithDay();
+    const message = `🎉 New subscription!\n\nEmail: ${email}\nTime: ${formattedDateTime}`;
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
     const response = await fetch(url, {
