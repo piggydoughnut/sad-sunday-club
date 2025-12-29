@@ -26,9 +26,6 @@ export function getWelcomeEmailHTML() {
                 Thank you for joining.
               </p>
               <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #6b4e4d;">
-                We're not here to fix you. We're here to remind you that feeling is not a flaw.
-              </p>
-              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #6b4e4d;">
                 You'll receive quiet things from time to time — small letters, drawings, thoughts, or gentle reminders that you're doing okay.
               </p>
               <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #6b4e4d;">
