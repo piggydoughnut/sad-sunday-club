@@ -4,6 +4,7 @@
 // TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID (optional - for Telegram notifications)
 import FormData from "form-data";
 import Mailgun from "mailgun.js";
+import { getWelcomeEmailHTML } from "../emails/welcome-email.js";
 
 // Send Telegram notification (non-blocking)
 async function sendTelegramNotification(email) {
@@ -71,31 +72,14 @@ export async function subscribeHandler(req, res) {
       url: "https://api.eu.mailgun.net", // EU endpoint
     });
 
-    // Send notification email to admin
-    try {
-      await mg.messages.create(domain, {
-        from: `Sad Sunday Club <${fromEmail}>`,
-        to: [toEmail],
-        subject: "New Subscription",
-        text: `New subscription from: ${email}`,
-      });
-      console.log("Notification email sent successfully");
-    } catch (error) {
-      console.error("Mailgun API error (notification):", error);
-      return res.status(500).json({
-        error: error.message || "Failed to send notification email",
-        details:
-          "Check your Mailgun API key, domain, and that the domain is verified.",
-      });
-    }
-
     // Send welcome email to subscriber
     try {
       await mg.messages.create(domain, {
         from: `Sad Sunday Club <${fromEmail}>`,
         to: [email],
         subject: "Welcome to Sad Sunday Club",
-        text: `Thank you for joining Sad Sunday Club.\n\nWe're not here to fix you. We're here to remind you that feeling is not a flaw.\n\nYou'll receive quiet things from time to time — small letters, drawings, thoughts, or gentle reminders that you're doing okay.\n\nWelcome to the club.`,
+        html: getWelcomeEmailHTML(),
+        text: `Thank you for joining Sad Sunday Club.\n\nWe're not here to fix you. We're here to remind you that feeling is not a flaw.\n\nYou'll receive quiet things from time to time — small letters, drawings, thoughts, or gentle reminders that you're doing okay.\n\nWelcome to the club.`, // Plain text fallback
       });
       console.log("Welcome email sent successfully");
     } catch (error) {
