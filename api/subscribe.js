@@ -1,16 +1,53 @@
-// Vercel serverless function for Mailgun subscription
-// Set environment variables in Vercel dashboard:
+// Mailgun subscription handler for Dokploy
+// Set environment variables in Dokploy:
 // MAILGUN_API_KEY, MAILGUN_DOMAIN, SUBSCRIBE_FROM_EMAIL, SUBSCRIBE_TO_EMAIL
+// TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID (optional - for Telegram notifications)
 import FormData from "form-data";
 import Mailgun from "mailgun.js";
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+// Send Telegram notification (non-blocking)
+async function sendTelegramNotification(email) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!botToken || !chatId) {
+    return; // Telegram not configured, silently skip
   }
 
   try {
-    const { email } = req.body;
+    const message = `🎉 New subscription!\n\nEmail: ${email}`;
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Telegram API error:", error);
+    } else {
+      console.log("Telegram notification sent successfully");
+    }
+  } catch (error) {
+    console.error("Error sending Telegram notification:", error);
+    // Don't throw - we don't want Telegram failures to break subscriptions
+  }
+}
+
+export async function subscribeHandler(req, res) {
+  try {
+    const { email, website } = req.body;
+
+    // Honeypot check - if website field is filled, it's likely a bot
+    if (website) {
+      console.log("Bot detected: honeypot field filled");
+      return res.status(400).json({ error: "Invalid request" });
+    }
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: "Invalid email address" });
@@ -66,6 +103,11 @@ export default async function handler(req, res) {
       // If notification was sent but welcome failed, still return success
       // This might happen if using sandbox domain with unverified recipient
     }
+
+    // Send Telegram notification (non-blocking)
+    sendTelegramNotification(email).catch((error) => {
+      console.error("Failed to send Telegram notification:", error);
+    });
 
     return res.status(200).json({ message: "Subscription successful" });
   } catch (error) {

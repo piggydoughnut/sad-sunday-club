@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+DEPLOYMENT_EXPLANATION.md
+MAILGUN_SETUP.md
+vercel.json
+.env
+
